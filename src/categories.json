@@ -1,0 +1,117 @@
+{
+  "categories": {
+    "Medical": {
+      "patterns": [
+        "Cleveland Clinic",
+        "MetroHealth", 
+        "Mhs\\*Metrohealth",
+        "Kaiser Permanente",
+        "Mayo Clinic",
+        "CVS Pharmacy",
+        "Walgreens",
+        "Rite Aid",
+        "Urgent Care",
+        "Medical Center",
+        "Hospital",
+        "Dentist",
+        "Dental",
+        "Optometry",
+        "Vision Center"
+      ]
+    },
+    "Media": {
+      "patterns": [
+        "Netflix",
+        "Nytimes\\*Nytimes",
+        "New York Times",
+        "Hulu",
+        "Hbo",
+        "Disney Plus",
+        "Amazon Prime",
+        "Spotify",
+        "Apple Music",
+        "Youtube Premium",
+        "Twitch",
+        "Paramount",
+        "Peacock"
+      ]
+    },
+    "Transportation": {
+      "patterns": [
+        "Uber",
+        "Lyft",
+        "Shell",
+        "Bp#\\d+",
+        "Exxon",
+        "Marathon",
+        "Speedway",
+        "Gas Station",
+        "Metro",
+        "Transit"
+      ]
+    },
+    "Shopping": {
+      "patterns": [
+        "Amazon",
+        "Amzn",
+        "Walmart",
+        "Target",
+        "Costco",
+        "Home Depot",
+        "Lowes",
+        "Best Buy",
+        "Macy's",
+        "Etsy"
+      ]
+    },
+    "Food": {
+      "patterns": [
+        "Restaurant",
+        "McDonald's",
+        "Starbucks",
+        "Subway",
+        "Pizza",
+        "Doordash",
+        "Uber Eats",
+        "Grubhub",
+        "Chipotle",
+        "Panera"
+      ]
+    },
+    "Subscription": {
+      "patterns": [
+        "Recurring",
+        "Apple\\.Com/Bill",
+        "Google",
+        "Microsoft",
+        "Adobe",
+        "Onlyfans",
+        "Tovala",
+        "Audible"
+      ]
+    },
+    "Utilities": {
+      "patterns": [
+        "Electric",
+        "Gas Company",
+        "Water Department",
+        "Internet",
+        "Cable",
+        "Phone Bill",
+        "Verizon",
+        "At&T",
+        "Comcast"
+      ]
+    },
+    "Income": {
+      "patterns": [
+        "DirectDeposit",
+        "Payroll",
+        "Salary",
+        "Wages",
+        "Tax Refund",
+        "Interest"
+      ]
+    }
+  }
+}

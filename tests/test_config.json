@@ -1,0 +1,94 @@
+{
+  "contamination_test_cases": [
+    {
+      "name": "Google transaction with summary contamination",
+      "input": "3767 Recurring Debit Card Google Llc There were 122 other Banking",
+      "expected": "3767 Recurring Debit Card Google Llc",
+      "description": "Tests removal of mid-line summary text contamination"
+    },
+    {
+      "name": "Walmart transaction with spacing issues",
+      "input": "Debit Card CreditWalmart.Com8009666546 BENTONVILLEAR",
+      "expected": "Debit Card Credit Walmart.Com 8009666546 BENTONVILLE AR",
+      "description": "Tests fixing of concatenated phone numbers and locations"
+    },
+    {
+      "name": "Direct deposit with contamination",
+      "input": "DirectDeposit - Payroll ACME LLC 00209104E34DE14 Withdrawal",
+      "expected": "Direct Deposit - Payroll ACME LLC 00209104E34DE14",
+      "description": "Tests DirectDeposit spacing fix and trailing contamination removal"
+    },
+    {
+      "name": "Banking contamination patterns",
+      "input": "3767 Debit Card Purchase ACME Store There were 8 PIN POS purchases totaling",
+      "expected": "3767 Debit Card Purchase ACME Store",
+      "description": "Tests removal of PIN POS summary contamination"
+    },
+    {
+      "name": "Machine debit contamination",
+      "input": "ATM Withdrawal ACME Bank Machine/Debit Card deductions totaling $100.00",
+      "expected": "ATM Withdrawal ACME Bank",
+      "description": "Tests removal of machine/debit contamination"
+    },
+    {
+      "name": "Company name spacing",
+      "input": "Payment to ACMELLC Services",
+      "expected": "Payment to ACME LLC Services",
+      "description": "Tests fixing concatenated LLC company names"
+    },
+    {
+      "name": "January 2024 debit card spacing",
+      "input": "3767DebitCard Purchase Amazon",
+      "expected": "3767 Debit Card Purchase Amazon",
+      "description": "Tests fixing missing spaces in January 2024 statement format"
+    },
+    {
+      "name": "January 2024 recurring spacing",
+      "input": "3767RecurringDebit Card Netflix",
+      "expected": "3767 Recurring Debit Card Netflix",
+      "description": "Tests fixing missing spaces in recurring payments"
+    }
+  ],
+  "merchant_extraction_test_cases": [
+    {
+      "name": "Standard debit card purchase",
+      "input": "1234 Debit Card Purchase ACME Store",
+      "expected_merchant": "ACME Store",
+      "expected_card": "1234",
+      "description": "Tests basic merchant and card extraction"
+    },
+    {
+      "name": "Recurring payment",
+      "input": "5678 Recurring Debit Card Netflix Subscription",
+      "expected_merchant": "Netflix Subscription",
+      "expected_card": "5678",
+      "description": "Tests recurring payment extraction"
+    },
+    {
+      "name": "Direct deposit",
+      "input": "Direct Deposit - Payroll ACME CORP",
+      "expected_merchant": "ACME CORP",
+      "expected_card": "",
+      "description": "Tests direct deposit merchant extraction"
+    }
+  ],
+  "validation_test_cases": [
+    {
+      "name": "Valid merchant continuation",
+      "lines": ["Seattle", "WA", "Gsuite_subscription", "800-555-0123"],
+      "expected_valid": [true, true, true, true],
+      "description": "Tests merchant continuation line validation"
+    },
+    {
+      "name": "Invalid contamination lines",
+      "lines": [
+        "There were 5 transactions totaling $500.00",
+        "PIN POS purchases totaling",
+        "Banking Machine withdrawals",
+        "$250.99"
+      ],
+      "expected_valid": [false, false, false, false],
+      "description": "Tests rejection of contamination lines"
+    }
+  ]
+}
