@@ -8,8 +8,14 @@
         "Kaiser Permanente",
         "Mayo Clinic",
         "CVS Pharmacy",
+        "CVS/Pharmacy",
+        "www\\.cvs\\.com",
         "Walgreens",
+        "Walgreens Stor",
+        "Doordash.*Walgreens",
+        "DD.*Doordash.*Walgreens",
         "Rite Aid",
+        "Hudec Dental",
         "Urgent Care",
         "Medical Center",
         "Hospital",
@@ -111,6 +117,34 @@
         "Wages",
         "Tax Refund",
         "Interest"
+      ]
+    },
+    "Charity": {
+      "patterns": [
+        "Rip Medical Debt",
+        "Un Foundation",
+        "United Way",
+        "Salvation Army",
+        "Red Cross",
+        "Goodwill",
+        "Planned Parenthood",
+        "NPR",
+        "PBS",
+        "Wikipedia",
+        "Aclu",
+        "Electronic Frontier Foundation",
+        "EFF",
+        "St Jude",
+        "St. Jude"
+      ]
+    },
+    "Political": {
+      "patterns": [
+        "Actblue",
+        "Act Blue",
+        "Campaign",
+        "Political Action",
+        "PAC"
       ]
     }
   }
