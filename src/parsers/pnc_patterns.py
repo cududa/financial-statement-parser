@@ -12,9 +12,9 @@ class PNCPatterns:
         # Date patterns
         self.DATE_PATTERN = re.compile(r'^(\d{1,2}/\d{1,2})\s+')
         
-        # Amount patterns  
-        self.AMOUNT_PATTERN = re.compile(r'(\d{1,3}(?:,\d{3})*\.\d{2})')
-        self.SIMPLE_AMOUNT = re.compile(r'(\d+\.\d{2})')
+        # Amount patterns allow optional leading digits to catch values like ".75"
+        self.AMOUNT_PATTERN = re.compile(r'((?:\d{1,3}(?:,\d{3})*)?\.\d{2})')
+        self.SIMPLE_AMOUNT = re.compile(r'((?:\d+)?\.\d{2})')
         
         # Transaction type patterns
         self.DEBIT_CARD_PURCHASE = re.compile(r'(\d{4})\s+Debit Card Purchase\s+(.+)', re.IGNORECASE)

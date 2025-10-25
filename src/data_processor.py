@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import List, Tuple, Set
+from typing import List, Tuple, Set, Optional
 import logging
 from datetime import datetime
 
@@ -100,7 +100,7 @@ class DataProcessor:
         return transactions
     
     def calculate_running_balances(self, transactions: List[Transaction], 
-                                 opening_balance: Decimal | None = None) -> List[Transaction]:
+                                 opening_balance: Optional[Decimal] = None) -> List[Transaction]:
         """
         Calculate running balances for transactions.
         Assumes transactions are in chronological order.
