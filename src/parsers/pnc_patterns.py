@@ -31,8 +31,12 @@ class PNCPatterns:
         self.SECTION_END = re.compile(r'(continued on next page|^\s*$)')
         
         # Header patterns
-        self.ACCOUNT_PATTERN = re.compile(r'Primary account number:\s*(\d{2}-\d{4}-\d{4})')
-        self.PERIOD_PATTERN = re.compile(r'For the period\s+(\d{1,2}/\d{1,2}/\d{4})\s+to\s+(\d{1,2}/\d{1,2}/\d{4})')
+        self.ACCOUNT_PATTERN = re.compile(r'Primary\s*account(?:\s*number)?\s*:\s*([\d\-]+)', re.IGNORECASE)
+        self.PERIOD_PATTERN = re.compile(r'For the period\s+(\d{1,2}/\d{1,2}/\d{4})\s+to\s+(\d{1,2}/\d{1,2}/\d{4})', re.IGNORECASE)
+        self.ALT_PERIOD_PATTERN = re.compile(
+            r'Beginning\s*([A-Za-z]+)\s*(\d{1,2}),\s*(\d{4})\s*-\s*Ending\s*([A-Za-z]+)\s*(\d{1,2}),\s*(\d{4})',
+            re.IGNORECASE
+        )
         self.PAGE_PATTERN = re.compile(r'Page\s+(\d+)\s+of\s+(\d+)')
         
         # Extraneous text patterns to ignore/filter out
