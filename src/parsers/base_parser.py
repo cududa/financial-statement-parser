@@ -73,12 +73,23 @@ class BaseStatementParser(ABC):
                     f"outside statement period"
                 )
         
-        # Duplicate detection
+        # Duplicate detection - include page and position to avoid false positives
+        # for legitimate same-day, same-amount transactions at the same merchant
         seen_transactions = set()
-        for transaction in transactions:
-            tx_key = (transaction.date, transaction.amount, transaction.description[:50])
+        for idx, transaction in enumerate(transactions):
+            tx_key = (
+                transaction.date,
+                transaction.amount,
+                transaction.description[:50],
+                transaction.page_number,
+                transaction.source_file,
+                idx  # Position in transaction list as tie-breaker
+            )
             if tx_key in seen_transactions:
-                warnings.append(f"Potential duplicate transaction: {transaction.date} {transaction.amount}")
+                warnings.append(
+                    f"Potential duplicate transaction: {transaction.date} "
+                    f"{transaction.amount} on page {transaction.page_number}"
+                )
             seen_transactions.add(tx_key)
         
         # Amount reasonableness check

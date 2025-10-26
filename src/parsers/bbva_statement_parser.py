@@ -81,7 +81,7 @@ class BBVAStatementParser(BaseStatementParser):
 
     def _extract_legacy_transactions(self, text: str, summary: StatementSummary, source_file: str = "") -> List[Transaction]:
         transactions: List[Transaction] = []
-        seen_keys: Set[Tuple[str, str, str]] = set()
+        seen_keys: Set[Tuple[str, str, str, int]] = set()
 
         lines = text.split('\n')
         current_page = 1
@@ -149,7 +149,8 @@ class BBVAStatementParser(BaseStatementParser):
             month = int(normalized_date.split('/')[0])
 
             card_last_four = self._extract_card_last_four(combined)
-            key = (normalized_date, transaction_amount_str, description_portion.upper())
+            # Include line position to distinguish legitimate same-day, same-amount transactions
+            key = (normalized_date, transaction_amount_str, description_portion.upper(), i)
             if key in seen_keys:
                 i = j
                 continue

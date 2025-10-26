@@ -231,24 +231,31 @@ class DataProcessor:
         return incomplete_count == 0
     
     def _find_duplicates(self, transactions: List[Transaction]) -> List[List[Transaction]]:
-        """Find potential duplicate transactions"""
+        """Find potential duplicate transactions
+
+        Includes page number, source file, and position to distinguish legitimate
+        same-day, same-amount transactions at the same merchant from true duplicates.
+        """
         duplicates = []
         seen = {}
-        
-        for transaction in transactions:
-            # Create a key based on date, amount, and merchant
+
+        for idx, transaction in enumerate(transactions):
+            # Create a key that includes position to handle legitimate same-day duplicates
             key = (
                 transaction.date,
                 transaction.amount,
-                transaction.merchant.lower() if transaction.merchant else ""
+                transaction.merchant.lower() if transaction.merchant else "",
+                transaction.page_number,
+                transaction.source_file,
+                idx  # Position in transaction list as tie-breaker
             )
-            
+
             if key in seen:
                 # Found potential duplicate
                 duplicates.append([seen[key], transaction])
             else:
                 seen[key] = transaction
-        
+
         return duplicates
     
     def get_validation_report(self) -> str:
