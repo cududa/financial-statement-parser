@@ -7,7 +7,7 @@ from typing import List, Optional, Set, Tuple
 try:
     from ..models import Transaction, StatementSummary
     from .base_parser import BaseStatementParser
-    from .pnc_patterns import PNCPatterns
+    from .bbva_patterns import BBVAPatterns
     from .categorization import TransactionCategorizer
 except ImportError:
     import sys
@@ -15,7 +15,7 @@ except ImportError:
     sys.path.append(str(Path(__file__).parent.parent))
     from models import Transaction, StatementSummary
     from base_parser import BaseStatementParser
-    from pnc_patterns import PNCPatterns
+    from bbva_patterns import BBVAPatterns
     from categorization import TransactionCategorizer
 
 logger = logging.getLogger(__name__)
@@ -25,34 +25,32 @@ class BBVAStatementParser(BaseStatementParser):
     """Parser for legacy BBVA statements that pre-date the PNC migration."""
 
     def __init__(self):
-        self.patterns = PNCPatterns()
+        self.patterns = BBVAPatterns()
         self.categorizer = TransactionCategorizer()
 
     def parse_account_info(self, text: str) -> Optional[StatementSummary]:
-        """Extract account header information from legacy format."""
+        """Extract account header information from BBVA legacy format."""
         try:
             account_match = self.patterns.ACCOUNT_PATTERN.search(text)
             account_number = account_match.group(1).strip() if account_match else "Unknown"
 
+            # BBVA uses "Beginning August 2, 2021 - Ending September 1, 2021" format
             period_match = self.patterns.PERIOD_PATTERN.search(text)
-            if period_match:
-                start_date = datetime.strptime(period_match.group(1), '%m/%d/%Y')
-                end_date = datetime.strptime(period_match.group(2), '%m/%d/%Y')
-            else:
-                alt_period_match = self.patterns.ALT_PERIOD_PATTERN.search(text)
-                if not alt_period_match:
-                    logger.warning("BBVA parser could not parse statement period")
-                    return None
-                start_date = self._parse_month_day_year(
-                    alt_period_match.group(1),
-                    alt_period_match.group(2),
-                    alt_period_match.group(3)
-                )
-                end_date = self._parse_month_day_year(
-                    alt_period_match.group(4),
-                    alt_period_match.group(5),
-                    alt_period_match.group(6)
-                )
+            if not period_match:
+                logger.warning("BBVA parser could not parse statement period")
+                return None
+
+            # Parse BBVA period format with full month names
+            start_date = self._parse_month_day_year(
+                period_match.group(1),  # Start month name
+                period_match.group(2),  # Start day
+                period_match.group(3)   # Start year
+            )
+            end_date = self._parse_month_day_year(
+                period_match.group(4),  # End month name
+                period_match.group(5),  # End day
+                period_match.group(6)   # End year
+            )
 
             page_match = self.patterns.PAGE_PATTERN.search(text)
             total_pages = int(page_match.group(2)) if page_match else 1
@@ -71,31 +69,25 @@ class BBVAStatementParser(BaseStatementParser):
             logger.error(f"Failed to parse BBVA account info: {exc}")
             return None
 
-    def extract_transaction_data(self, text: str) -> List[Transaction]:
+    def extract_transaction_data(self, text: str, source_file: str = "") -> List[Transaction]:
         summary = self.parse_account_info(text)
         if not summary:
             logger.error("BBVA parser could not parse header; aborting transactions")
             return []
 
-        transactions = self._extract_legacy_transactions(text, summary)
+        transactions = self._extract_legacy_transactions(text, summary, source_file)
         logger.info(f"Extracted {len(transactions)} BBVA transactions")
         return transactions
 
-    def _extract_legacy_transactions(self, text: str, summary: StatementSummary) -> List[Transaction]:
+    def _extract_legacy_transactions(self, text: str, summary: StatementSummary, source_file: str = "") -> List[Transaction]:
         transactions: List[Transaction] = []
         seen_keys: Set[Tuple[str, str, str]] = set()
 
         lines = text.split('\n')
         current_page = 1
         i = 0
-        summary_stop_prefixes = [
-            'ENDING BALANCE',
-            'TOTALS',
-            'PERIODIC',
-            'TOTAL THIS PERIOD',
-            'HOW TO BALANCE',
-            'BALANCINGYOURREGISTER',
-        ]
+        # Use BBVA-specific stop patterns from the patterns class
+        summary_stop_prefixes = self.patterns.STOP_PATTERNS
 
         while i < len(lines):
             raw_line = lines[i]
@@ -131,7 +123,7 @@ class BBVAStatementParser(BaseStatementParser):
                 if lookahead.startswith('--- PAGE') or self.patterns.DATE_PATTERN.match(lookahead):
                     break
                 normalized = re.sub(r'\s+', '', lookahead.upper())
-                if any(normalized.startswith(prefix.replace(' ', '')) for prefix in summary_stop_prefixes):
+                if any(normalized.startswith(prefix.replace(' ', '').upper()) for prefix in summary_stop_prefixes):
                     break
                 raw_lines.append(lookahead_raw)
                 combined += ' ' + lookahead
@@ -174,7 +166,8 @@ class BBVAStatementParser(BaseStatementParser):
                 card_last_four=card_last_four,
                 category=self.categorizer.categorize_transaction(description_portion),
                 raw_lines=raw_lines,
-                page_number=current_page
+                page_number=current_page,
+                source_file=source_file
             )
             transactions.append(transaction)
             i = j
