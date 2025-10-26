@@ -49,7 +49,8 @@ class DataProcessor:
                     card_last_four=transaction.card_last_four,
                     category=transaction.category,
                     raw_lines=transaction.raw_lines,
-                    page_number=transaction.page_number
+                    page_number=transaction.page_number,
+                    source_file=transaction.source_file
                 )
                 
                 cleaned_transactions.append(cleaned_transaction)

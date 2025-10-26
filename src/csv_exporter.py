@@ -25,14 +25,13 @@ class CSVExporter:
             'Card', 'Category', 'Source_File', 'Month', 'Page'
         ]
     
-    def format_data_for_export(self, transactions: List[Transaction], 
-                             source_file: str = "unknown") -> List[dict]:
+    def format_data_for_export(self, transactions: List[Transaction]) -> List[dict]:
         """
         Format transaction data for CSV export.
         Returns list of dictionaries ready for CSV writing.
         """
         formatted_data = []
-        
+
         for transaction in transactions:
             row = {
                 'Date': transaction.full_date.strftime('%Y-%m-%d'),
@@ -42,7 +41,7 @@ class CSVExporter:
                 'Merchant': transaction.merchant,
                 'Card': transaction.card_last_four,
                 'Category': transaction.category,
-                'Source_File': source_file,
+                'Source_File': transaction.source_file,
                 'Month': f"{transaction.year}-{transaction.month:02d}",
                 'Page': transaction.page_number
             }
@@ -54,14 +53,14 @@ class CSVExporter:
         logger.info(f"Formatted {len(formatted_data)} transactions for export")
         return formatted_data
     
-    def generate_csv_output(self, transactions: List[Transaction], 
-                          output_path: Path, source_file: str = "unknown") -> bool:
+    def generate_csv_output(self, transactions: List[Transaction],
+                          output_path: Path) -> bool:
         """
         Generate CSV file from transactions.
         Returns True if successful.
         """
         try:
-            formatted_data = self.format_data_for_export(transactions, source_file)
+            formatted_data = self.format_data_for_export(transactions)
             
             with open(output_path, 'w', newline='', encoding='utf-8') as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=self.default_columns)
@@ -76,14 +75,14 @@ class CSVExporter:
             return False
     
     def create_google_sheets_compatible_format(self, transactions: List[Transaction],
-                                             output_path: Path, source_file: str = "unknown") -> bool:
+                                             output_path: Path) -> bool:
         """
         Create CSV optimized specifically for Google Sheets import.
         Includes proper date formatting and data types.
         """
         try:
             # Use pandas for better Google Sheets compatibility
-            formatted_data = self.format_data_for_export(transactions, source_file)
+            formatted_data = self.format_data_for_export(transactions)
             df = pd.DataFrame(formatted_data)
             
             # Ensure proper data types for Google Sheets
@@ -192,7 +191,7 @@ class CSVExporter:
         file.write("\n")
     
     def export_monthly_files(self, transactions: List[Transaction],
-                           output_dir: Path, source_file: str = "unknown") -> bool:
+                           output_dir: Path) -> bool:
         """
         Export separate CSV files for each month, organized by year subdirectories.
         Structure: output_dir/YYYY/transactions_YYYY-MM.csv
@@ -220,7 +219,7 @@ class CSVExporter:
 
                 # Create monthly file in year subdirectory
                 month_file = year_dir / f"transactions_{month}.csv"
-                success = self.generate_csv_output(month_transactions, month_file, source_file)
+                success = self.generate_csv_output(month_transactions, month_file)
                 if not success:
                     return False
 

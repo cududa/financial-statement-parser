@@ -31,8 +31,8 @@ class TransactionParser:
         self.text_cleaner = TextCleaner(patterns)
         self.merchant_extractor = MerchantExtractor(patterns)
     
-    def parse_transaction_lines(self, section_text: str, summary: StatementSummary, 
-                              transaction_type: str) -> List[Transaction]:
+    def parse_transaction_lines(self, section_text: str, summary: StatementSummary,
+                              transaction_type: str, source_file: str = "") -> List[Transaction]:
         """
         Parse individual transaction lines from a section.
         Handles multi-line descriptions.
@@ -72,7 +72,7 @@ class TransactionParser:
             date_match = self.patterns.DATE_PATTERN.match(line)
             if date_match:
                 transaction = self._parse_single_transaction(
-                    lines, i, summary, transaction_type, current_page
+                    lines, i, summary, transaction_type, current_page, source_file
                 )
                 if transaction:
                     transactions.append(transaction)
@@ -85,8 +85,8 @@ class TransactionParser:
         
         return transactions
     
-    def parse_transaction_lines_with_page(self, section_text: str, summary: StatementSummary, 
-                                        transaction_type: str, starting_page: int) -> List[Transaction]:
+    def parse_transaction_lines_with_page(self, section_text: str, summary: StatementSummary,
+                                        transaction_type: str, starting_page: int, source_file: str = "") -> List[Transaction]:
         """Parse transaction lines with a known starting page number"""
         transactions = []
         lines = section_text.split('\n')
@@ -114,7 +114,7 @@ class TransactionParser:
             date_match = self.patterns.DATE_PATTERN.match(line)
             if date_match:
                 transaction = self._parse_single_transaction(
-                    lines, i, summary, transaction_type, current_page
+                    lines, i, summary, transaction_type, current_page, source_file
                 )
                 if transaction:
                     transactions.append(transaction)
@@ -127,8 +127,8 @@ class TransactionParser:
         
         return transactions
     
-    def _parse_single_transaction(self, lines: List[str], start_idx: int, summary: StatementSummary, 
-                                transaction_type: str, page_number: int) -> Optional[Transaction]:
+    def _parse_single_transaction(self, lines: List[str], start_idx: int, summary: StatementSummary,
+                                transaction_type: str, page_number: int, source_file: str = "") -> Optional[Transaction]:
         """
         Parse a single transaction that may span multiple lines.
         Returns Transaction object or None if parsing fails.
@@ -239,7 +239,8 @@ class TransactionParser:
                 card_last_four=card_last_four,
                 category=category,
                 raw_lines=raw_lines,
-                page_number=page_number
+                page_number=page_number,
+                source_file=source_file
             )
             
         except Exception as e:
