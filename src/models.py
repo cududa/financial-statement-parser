@@ -21,7 +21,8 @@ class Transaction:
     category: str          # Auto-categorized type
     raw_lines: List[str]   # Original text lines for debugging
     page_number: int       # Source page
-    
+    source_file: str = ""  # Source PDF filename
+
     @property
     def full_date(self) -> datetime:
         """Convert MM/DD date to full datetime using statement year/month"""

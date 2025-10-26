@@ -48,7 +48,9 @@ logger = logging.getLogger(__name__)
               help='Enable verbose logging')
 @click.option('--validate-only', is_flag=True,
               help='Only validate files without generating output')
-def main(file, directory, year, base_path, include_next_month, output, monthly, summary, verbose, validate_only):
+@click.option('--detect-duplicates', is_flag=True,
+              help='Enable duplicate transaction detection (disabled by default)')
+def main(file, directory, year, base_path, include_next_month, output, monthly, summary, verbose, validate_only, detect_duplicates):
     """
     PNC Statement Parser - Convert PNC bank statement PDFs to CSV format.
     
@@ -147,9 +149,9 @@ def main(file, directory, year, base_path, include_next_month, output, monthly, 
             
             # Combine pages
             combined_text = ingester.handle_multi_page_documents(pages_text)
-            
+
             # Parse transactions
-            transactions = parser.extract_transaction_data(combined_text)
+            transactions = parser.extract_transaction_data(combined_text, source_file=pdf_file.name)
             if not transactions:
                 click.echo(f"Warning: No transactions found in {pdf_file.name}", err=True)
                 continue
@@ -161,15 +163,18 @@ def main(file, directory, year, base_path, include_next_month, output, monthly, 
             
             # Clean and validate
             cleaned_transactions = processor.clean_transaction_data(transactions)
-            
+
             if statement_summary:
                 is_valid = processor.validate_data_integrity(cleaned_transactions, statement_summary)
                 if not is_valid:
                     click.echo(f"Warning: Validation issues found in {pdf_file.name}")
-            
-            # Handle duplicates
-            final_transactions = processor.handle_duplicate_transactions(cleaned_transactions)
-            
+
+            # Handle duplicates only if flag is enabled
+            if detect_duplicates:
+                final_transactions = processor.handle_duplicate_transactions(cleaned_transactions)
+            else:
+                final_transactions = cleaned_transactions
+
             all_transactions.extend(final_transactions)
             click.echo(f"  Extracted {len(final_transactions)} transactions")
         
@@ -209,11 +214,10 @@ def main(file, directory, year, base_path, include_next_month, output, monthly, 
             summary_path = Path(summary) if summary else None
         
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Main CSV export
-        source_files = ", ".join(f.name for f in pdf_files)
         success = exporter.create_google_sheets_compatible_format(
-            all_transactions, output_path, source_files
+            all_transactions, output_path
         )
         
         if success:
@@ -224,7 +228,7 @@ def main(file, directory, year, base_path, include_next_month, output, monthly, 
         
         # Monthly exports if requested (auto-enabled for year mode)
         if monthly or year_mode:
-            success = exporter.export_monthly_files(all_transactions, monthly_dir, source_files)
+            success = exporter.export_monthly_files(all_transactions, monthly_dir)
             if success:
                 click.echo(f"Exported monthly files to: {monthly_dir}")
         

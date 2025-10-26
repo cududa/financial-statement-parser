@@ -86,33 +86,33 @@ class PNCStatementParser(BaseStatementParser):
             logger.error(f"Failed to parse account info: {e}")
             return None
     
-    def extract_transaction_data(self, text: str) -> List[Transaction]:
+    def extract_transaction_data(self, text: str, source_file: str = "") -> List[Transaction]:
         """
         Extract all transactions from statement text.
         Handles deposits, withdrawals, and online banking sections.
         """
         transactions = []
-        
+
         # Parse account info for date context
         summary = self.parse_account_info(text)
         if not summary:
             logger.error("Could not parse statement header - cannot determine year")
             return []
-        
+
         # Extract deposits
-        deposits = self.section_extractor.extract_deposits_section(text, summary)
+        deposits = self.section_extractor.extract_deposits_section(text, summary, source_file)
         transactions.extend(deposits)
 
-        # Extract withdrawals  
-        withdrawals = self.section_extractor.extract_withdrawals_section(text, summary)
+        # Extract withdrawals
+        withdrawals = self.section_extractor.extract_withdrawals_section(text, summary, source_file)
         transactions.extend(withdrawals)
 
         # Extract online banking deductions
-        online_banking = self.section_extractor.extract_online_banking_section(text, summary)
+        online_banking = self.section_extractor.extract_online_banking_section(text, summary, source_file)
         transactions.extend(online_banking)
 
         if not transactions:
-            legacy_transactions = self._extract_legacy_table_transactions(text, summary)
+            legacy_transactions = self._extract_legacy_table_transactions(text, summary, source_file)
             if legacy_transactions:
                 logger.info(f"Extracted {len(legacy_transactions)} legacy table transactions")
                 transactions.extend(legacy_transactions)
@@ -132,7 +132,7 @@ class PNCStatementParser(BaseStatementParser):
             # Fallback for abbreviated month names
             return datetime.strptime(f"{month_str} {day} {year}", '%b %d %Y')
 
-    def _extract_legacy_table_transactions(self, text: str, summary: StatementSummary) -> List[Transaction]:
+    def _extract_legacy_table_transactions(self, text: str, summary: StatementSummary, source_file: str = "") -> List[Transaction]:
         """Fallback parser for legacy statements with combined credit/debit tables."""
         legacy_transactions = []
         lines = text.split('\n')
@@ -178,7 +178,8 @@ class PNCStatementParser(BaseStatementParser):
             parsed = self.transaction_parser.parse_transaction_lines(
                 synthetic_line,
                 summary,
-                transaction_type=transaction_type
+                transaction_type=transaction_type,
+                source_file=source_file
             )
 
             legacy_transactions.extend(parsed)
