@@ -8,13 +8,13 @@ import sys
 
 try:
     from .pdf_ingester import PDFIngester
-    from .parsers import PNCStatementParser
+    from .parsers import PNCStatementParser, BBVAStatementParser
     from .data_processor import DataProcessor
     from .csv_exporter import CSVExporter
     from .year_processor import YearProcessor
 except ImportError:
     from pdf_ingester import PDFIngester
-    from parsers import PNCStatementParser
+    from parsers import PNCStatementParser, BBVAStatementParser
     from data_processor import DataProcessor
     from csv_exporter import CSVExporter
     from year_processor import YearProcessor
@@ -87,7 +87,10 @@ def main(file, directory, year, base_path, include_next_month, output, monthly, 
     try:
         # Initialize components
         ingester = PDFIngester()
-        parser = PNCStatementParser()
+        parsers_by_type = {
+            'PNC_VIRTUAL_WALLET': PNCStatementParser(),
+            'BBVA_LEGACY': BBVAStatementParser(),
+        }
         processor = DataProcessor()
         exporter = CSVExporter()
         
@@ -137,8 +140,12 @@ def main(file, directory, year, base_path, include_next_month, output, monthly, 
             
             # Identify statement type
             statement_type = ingester.identify_statement_type(pages_text)
-            if statement_type != 'PNC_VIRTUAL_WALLET':
-                click.echo(f"Warning: {pdf_file.name} may not be a PNC Virtual Wallet statement", err=True)
+            if statement_type == 'BBVA_LEGACY':
+                click.echo(f"Detected BBVA legacy statement: {pdf_file.name}")
+            elif statement_type != 'PNC_VIRTUAL_WALLET':
+                click.echo(f"Warning: {pdf_file.name} format not recognized; attempting PNC parser", err=True)
+            
+            parser = parsers_by_type.get(statement_type, parsers_by_type['PNC_VIRTUAL_WALLET'])
             
             # Combine pages
             combined_text = ingester.handle_multi_page_documents(pages_text)

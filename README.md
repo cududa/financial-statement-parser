@@ -2,6 +2,8 @@
 
 A Python application that automatically extracts financial transaction data from PNC bank statement PDFs and converts them into structured CSV format suitable for import into Google Sheets or Excel.
 
+> **⚠️ Important Notice**: This tool is provided for **personal use only** to assist with organizing financial records. It is not a substitute for professional financial advice. Always verify the accuracy of parsed data against your original statements and consult with a certified public accountant (CPA) or qualified financial professional for tax preparation, financial planning, and compliance with applicable laws and regulations. See [Disclaimers](#disclaimers-and-legal-notice) for important legal information.
+
 ## 🎯 Features
 
 ### Reliable Text-Based Parsing
@@ -425,6 +427,33 @@ This project is provided as-is for personal financial data processing. Use respo
 - Always verify extracted data against original statements
 - Keep your PDF files and exported CSVs secure
 - Consider encryption for sensitive financial data
+
+## ⚠️ Disclaimers and Legal Notice
+
+### No Warranty
+
+This software is provided "AS IS" without warranty of any kind, either express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or accuracy. The authors and contributors make no representations or warranties regarding the correctness, completeness, or reliability of the parsed output. Users assume all risks associated with the use of this software.
+
+### Professional Advice Required
+
+This parser is a convenience tool only and **should not be relied upon** as the sole source for financial record-keeping, tax preparation, or financial decision-making. Given the sensitive and legally significant nature of financial data, you must consult with a certified public accountant (CPA), enrolled agent, or other qualified financial professional for:
+- Tax preparation and filing
+- Financial planning and analysis
+- Compliance with federal, state, and local tax laws and regulations
+- Interpretation of financial transactions and categorizations
+- Any financial decisions based on this data
+
+### User Responsibility and Verification
+
+**You are solely responsible for**:
+- Verifying 100% accuracy of all parsed transactions against original bank statements before any use
+- Ensuring compliance with all applicable tax laws and financial regulations in your jurisdiction
+- Maintaining proper records and documentation as required by law
+- Understanding that automated categorization may not reflect proper tax or accounting treatment
+- Securing and protecting your financial data appropriately
+- Any consequences arising from the use or misuse of this software
+
+Automated extraction from PDF documents can never guarantee 100% accuracy. Manual review and verification against official bank statements is **required** before using parsed data for financial, tax, or legal purposes.
 
 ---
 

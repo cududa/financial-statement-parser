@@ -39,15 +39,43 @@ class PDFIngester:
     
     def extract_text_content(self, file_path: Path) -> List[str]:
         """
-        Extract text from all pages using pdfplumber.
+        Extract text from all pages using pdfplumber with PyPDF2 fallback.
         Returns list of strings, one per page.
+
+        Uses PyPDF2 as fallback when:
+        1. pdfplumber throws an exception
+        2. pdfplumber reports fewer pages than PyPDF2 (encoding issue detection)
         """
         if not self.validate_pdf_format(file_path):
             raise ValueError(f"Invalid PDF file: {file_path}")
-        
+
         pages_text = []
-        
+
         try:
+            # First, check page count with both libraries to detect encoding issues
+            pdfplumber_page_count = 0
+            pypdf2_page_count = 0
+
+            with pdfplumber.open(file_path) as pdf:
+                pdfplumber_page_count = len(pdf.pages)
+
+            try:
+                with open(file_path, 'rb') as file:
+                    reader = PyPDF2.PdfReader(file)
+                    pypdf2_page_count = len(reader.pages)
+            except Exception as e:
+                logger.debug(f"PyPDF2 page count check failed: {e}")
+                pypdf2_page_count = pdfplumber_page_count
+
+            # If PyPDF2 reports more pages, use it instead (encoding issue detected)
+            if pypdf2_page_count > pdfplumber_page_count:
+                logger.warning(
+                    f"Page count mismatch detected: pdfplumber={pdfplumber_page_count}, "
+                    f"PyPDF2={pypdf2_page_count}. Using PyPDF2 for reliable extraction."
+                )
+                return self._extract_with_pypdf2(file_path)
+
+            # Otherwise proceed with pdfplumber
             with pdfplumber.open(file_path) as pdf:
                 for page_num, page in enumerate(pdf.pages, 1):
                     text = self._extract_page_text(page)
@@ -57,12 +85,12 @@ class PDFIngester:
                     else:
                         logger.warning(f"No text found on page {page_num}")
                         pages_text.append("")
-                        
+
         except Exception as e:
             logger.error(f"pdfplumber failed for {file_path}: {e}")
             # Fallback to PyPDF2
             pages_text = self._extract_with_pypdf2(file_path)
-            
+
         return pages_text
     
     def _extract_with_pypdf2(self, file_path: Path) -> List[str]:
@@ -193,15 +221,15 @@ class PDFIngester:
     
     def identify_statement_type(self, pages_text: List[str]) -> Optional[str]:
         """
-        Identify if this is a PNC Virtual Wallet statement.
+        Identify if this is a PNC Virtual Wallet or BBVA legacy statement.
         Returns statement type or None if not recognized.
         """
         if not pages_text:
             return None
-            
+
         first_page = pages_text[0].upper()
-        
-        # Check for PNC Virtual Wallet indicators
+
+        # Check for PNC Virtual Wallet indicators (page 1 only)
         pnc_indicators = [
             'VIRTUAL WALLET SPEND STATEMENT',
             'PNC BANK',
@@ -213,17 +241,28 @@ class PDFIngester:
                 logger.info("Identified as PNC Virtual Wallet statement")
                 return 'PNC_VIRTUAL_WALLET'
 
+        # Check for BBVA legacy indicators (check first 3 pages since PyPDF2 may format differently)
         legacy_header_variants = [
             'DATE * SERIAL # DESCRIPTION',
-            'DATE* SERIAL# DESCRIPTION'
+            'DATE* SERIAL# DESCRIPTION',
+            'DATE*SERIAL#DESCRIPTION'  # PyPDF2 variant without spaces
         ]
 
-        header_present = any(variant in first_page for variant in legacy_header_variants)
+        # Check first page for primary account
+        has_primary_account = 'PRIMARY ACCOUNT' in first_page or 'PRIMARYACCOUNT' in first_page
 
-        if (('PRIMARY ACCOUNT' in first_page or 'PRIMARYACCOUNT' in first_page)
-                and header_present):
-            logger.info("Identified as PNC Virtual Wallet statement (legacy layout)")
-            return 'PNC_VIRTUAL_WALLET'
+        # Check first 3 pages for legacy header (PyPDF2 may put it on page 2+)
+        header_present = False
+        pages_to_check = min(3, len(pages_text))
+        for i in range(pages_to_check):
+            page_upper = pages_text[i].upper()
+            if any(variant in page_upper for variant in legacy_header_variants):
+                header_present = True
+                break
+
+        if has_primary_account and header_present:
+            logger.info("Identified as BBVA legacy statement")
+            return 'BBVA_LEGACY'
 
         logger.warning("Could not identify statement type")
         return None
