@@ -145,9 +145,31 @@ Now centralized in `TextCleaner` class (`src/parsers/text_utils.py`):
 - Balance data and malformed lines
 
 ## 🔒 Security Notes
+
+### ⚠️ PUBLIC REPOSITORY - NO PII
+**This repository is PUBLIC on GitHub.** Never include Personally Identifiable Information (PII) in:
+- Code comments
+- Documentation (markdown files)
+- Example data or test files
+- Commit messages
+- Any other tracked files
+
+**Gitignore Protection:**
+- ✅ PDFs (input statements) are automatically ignored
+- ✅ CSVs (parsed outputs) are automatically ignored
+- ✅ `PNC_Documents/` folder is gitignored
+- ⚠️ **You must still avoid PII in code, docs, and comments**
+
+**Examples of PII to Avoid:**
+- Real account numbers (use masked examples like `x2157`)
+- Real names or addresses
+- Actual transaction amounts from personal statements
+- Specific merchant names that could identify individuals
+- Any real financial data in documentation or examples
+
+### Financial Data Security
 - Never commit actual bank statements (*.pdf)
 - Never commit parsed data (*.csv)
-- PNC_Documents/ folder is gitignored
 - Always validate financial data accuracy
 
 ## 💡 Common Issues & Solutions
