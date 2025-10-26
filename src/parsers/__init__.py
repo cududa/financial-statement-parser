@@ -25,6 +25,7 @@ Example Usage:
 
 from .base_parser import BaseStatementParser
 from .pnc_statement_parser import PNCStatementParser
+from .bbva_statement_parser import BBVAStatementParser
 from .pnc_patterns import PNCPatterns
 from .section_extractor import SectionExtractor
 from .transaction_parser import TransactionParser
@@ -34,6 +35,7 @@ from .text_utils import TextCleaner, MerchantExtractor
 __all__ = [
     'BaseStatementParser',
     'PNCStatementParser', 
+    'BBVAStatementParser',
     'PNCPatterns',
     'SectionExtractor',
     'TransactionParser',

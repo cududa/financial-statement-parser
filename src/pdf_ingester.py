@@ -222,8 +222,8 @@ class PDFIngester:
 
         if (('PRIMARY ACCOUNT' in first_page or 'PRIMARYACCOUNT' in first_page)
                 and header_present):
-            logger.info("Identified as PNC Virtual Wallet statement (legacy layout)")
-            return 'PNC_VIRTUAL_WALLET'
+            logger.info("Identified as BBVA legacy statement")
+            return 'BBVA_LEGACY'
 
         logger.warning("Could not identify statement type")
         return None
