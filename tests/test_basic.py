@@ -115,18 +115,18 @@ def test_csv_exporter():
             date="12/08", year=2022, month=12, amount=Decimal("38.87"),
             transaction_type="CREDIT", description="Test Credit",
             merchant="Test Merchant", card_last_four="3767", category="Income",
-            raw_lines=["test"], page_number=1
+            raw_lines=["test"], page_number=1, source_file="test.pdf"
         ),
         Transaction(
             date="12/09", year=2022, month=12, amount=Decimal("25.00"),
             transaction_type="DEBIT", description="Test Debit",
             merchant="Another Merchant", card_last_four="3767", category="Shopping",
-            raw_lines=["test"], page_number=1
+            raw_lines=["test"], page_number=1, source_file="test.pdf"
         )
     ]
     
     # Test formatting
-    formatted = exporter.format_data_for_export(transactions, "test.pdf")
+    formatted = exporter.format_data_for_export(transactions)
     assert len(formatted) == 2, f"Expected 2 formatted transactions, got {len(formatted)}"
     
     # Check credit amount is positive

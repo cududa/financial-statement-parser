@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 """Test stop pattern matching"""
 
+import sys
+from pathlib import Path
+
+# Add parent directory to Python path
+parent_path = Path(__file__).parent.parent
+sys.path.insert(0, str(parent_path))
+
 import re
 from src.parsers.bbva_patterns import BBVAPatterns
 
