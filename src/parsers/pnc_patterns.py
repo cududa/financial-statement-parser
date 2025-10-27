@@ -23,10 +23,10 @@ class PNCPatterns:
         self.DIRECT_DEPOSIT = re.compile(r'Direct\s*Deposit\s*-\s*(.+)', re.IGNORECASE)
         self.DEBIT_CARD_CREDIT = re.compile(r'DebitCard Credit(.+)', re.IGNORECASE)
         
-        # Section boundary patterns
-        self.DEPOSITS_START = re.compile(r'Deposits and Other Additions', re.IGNORECASE)
-        self.WITHDRAWALS_START = re.compile(r'Banking/Debit Card Withdrawals and Purchases', re.IGNORECASE)
-        self.ONLINE_BANKING_START = re.compile(r'Online and Electronic Banking Deductions', re.IGNORECASE)
+        # Section boundary patterns (flexible whitespace for PDF extraction variations)
+        self.DEPOSITS_START = re.compile(r'Deposits\s+and\s+Other\s+Additions', re.IGNORECASE)
+        self.WITHDRAWALS_START = re.compile(r'Banking/Debit\s+Card\s+Withdrawals\s*and\s*Purchases', re.IGNORECASE)
+        self.ONLINE_BANKING_START = re.compile(r'Online\s+and\s+Electronic\s+Banking\s+Deductions', re.IGNORECASE)
         self.DAILY_BALANCE_START = re.compile(r'Daily Balance Detail', re.IGNORECASE)
         self.SECTION_END = re.compile(r'(continued on next page|^\s*$)')
         
